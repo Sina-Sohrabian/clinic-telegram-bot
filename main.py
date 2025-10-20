@@ -1,29 +1,33 @@
 from flask import Flask
+from threading import Thread
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, CallbackContext
 import os
 
-# Create a small web server for Railway
+# Flask app to keep Railway alive
 app = Flask(__name__)
 
 @app.route('/')
 def home():
-    return "Bot is running successfully!"
+    return "✅ Bot is running on Railway!"
 
-# Telegram Bot Token (replace with your real one)
+# Telegram bot setup
 TOKEN = os.getenv("BOT_TOKEN")
 
-# Define a simple start command
 def start(update: Update, context: CallbackContext):
-    update.message.reply_text("Hello! I’m your clinic assistant bot 🤖")
+    update.message.reply_text("Hello! 👋 I’m your clinic assistant bot — ready to help you!")
 
-def main():
+def run_bot():
     updater = Updater(TOKEN)
     dp = updater.dispatcher
     dp.add_handler(CommandHandler("start", start))
     updater.start_polling()
     updater.idle()
 
-if __name__ == '__main__':
-    main()
+def run_flask():
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
+
+if __name__ == "__main__":
+    # Run both bot and Flask server at the same time
+    Thread(target=run_bot).start()
+    run_flask()
